@@ -2,23 +2,15 @@ const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: {
-    index: {
-      import: './src/index.ts',
-      dependOn: 'shared'
-    },
-    print: {
-      import: './src/print.ts',
-      dependOn: 'shared'
-    },
-    shared: 'lodash'
-  },
+  entry: path.join(__dirname, "./main.tsx"),//入口文件,
   devtool: 'inline-source-map',
   devServer: {
     static: './dist',
     port: 3000, // 设置端口号
     open: true, // 自动打开浏览器
     hot: true, // 启用热模块替换
+    historyApiFallback: true, // 启用HTML5 History API以处理404错误
+
   },
   output: {
     filename: '[name].[contenthash].js',
@@ -34,15 +26,18 @@ module.exports = {
   },
   mode: 'development',
   plugins: [
-    new HTMLWebpackPlugin({
-      title: 'Development',
-    })
+    new HTMLWebpackPlugin(
+      {
+        filename: 'index.html',
+        template: path.join(__dirname, 'index.html'),
+      }
+    )
   ],
   module: {
     rules: [
       {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader']
+        test: /\.css|less$/i,
+        use: ['style-loader', 'css-loader', 'less-loader']
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -50,13 +45,20 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: {noEmit: false},
+            }
+          }
+        ],
         exclude: /node_modules/,
       }
     ]
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js']
   },
   externals: {
     lodash: {
